@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Performance Analyzer · Trading Journal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Performance Analyzer</h1>
+    <p class="page-subtitle">Detailed statistics calculated from all {{ stats.total_trades }} trades.</p>
+  </div>
+  <a class="btn-primary" href="{{ url_for('ai_results') }}">Run AI Analysis</a>
+</div>
+
+<div class="stats-grid-5">
+  <div class="card">
+    <div class="stat-label">Total Trades</div>
+    <div class="stat-value">{{ stats.total_trades }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Wins</div>
+    <div class="stat-value profit">{{ stats.wins }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Losses</div>
+    <div class="stat-value loss">{{ stats.losses }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Win Rate</div>
+    <div class="stat-value">{{ "%.1f"|format(stats.win_rate) }}%</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Total P/L</div>
+    <div class="stat-value {{ 'profit' if stats.total_pnl >= 0 else 'loss' }}">
+      {{ "%+.2f"|format(stats.total_pnl) if stats.total_pnl > 0 else "%.2f"|format(stats.total_pnl) }}
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid-5">
+  <div class="card">
+    <div class="stat-label">Average Profit</div>
+    <div class="stat-value profit">+{{ "%.2f"|format(stats.avg_profit) }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Average Loss</div>
+    <div class="stat-value loss">-{{ "%.2f"|format(stats.avg_loss) }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Risk-to-Reward</div>
+    <div class="stat-value">{{ "%.2f"|format(stats.risk_reward) }}</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">SL Respected</div>
+    <div class="stat-value">{{ "%.1f"|format(stats.sl_respected_pct) }}%</div>
+    <div class="stat-sub">{{ stats.sl_respected_count }} of {{ stats.losses }} losing trades</div>
+  </div>
+  <div class="card">
+    <div class="stat-label">Largest Loss</div>
+    <div class="stat-value loss">-{{ "%.2f"|format(stats.largest_loss) }}</div>
+    <div class="stat-sub">{{ stats.largest_loss_label }} ({{ "%.2f"|format(stats.largest_loss_ratio) }}× avg)</div>
+  </div>
+</div>
+
+<div class="stats-grid-5">
+  <div class="card">
+    <div class="stat-label">Max Consecutive Losses</div>
+    <div class="stat-value">{{ stats.max_consecutive_losses }}</div>
+    {% if stats.streak_range %}
+      <div class="stat-sub">{{ stats.streak_range }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Performance Areas</div>
+      <div class="card-desc">How each area is rated using knowledge-base thresholds. These levels feed the AI graph costs.</div>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>Value</th>
+          <th>How it's rated</th>
+          <th class="num">Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in area_rows %}
+        <tr>
+          <td><strong>{{ row.label }}</strong></td>
+          <td>{{ row.value }}</td>
+          <td style="color: var(--muted);">{{ row.rule }}</td>
+          <td class="num">
+            <span class="badge badge-{{ row.level|lower }}">{{ row.level|title }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
